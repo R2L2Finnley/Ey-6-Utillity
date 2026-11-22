@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-APP=EY6Control
+APP=EY6Utility
 OUT=build
 rm -rf "$OUT"
 mkdir -p "$OUT/Payload/$APP.app" "$OUT/actool"
