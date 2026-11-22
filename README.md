@@ -8,7 +8,7 @@ Eine **iOS-App** zur Anzeige von Telemetriedaten, zur Bedienung von Standardfunk
 
 ## Vorschau
 
-![Egret EY! 6 App Ansichten](715153463-7aa898ac-75bc-4708-a2bb-22e6e42b9a3d.jpeg)
+<img width="1200" height="896" alt="IMG_4528" src="https://github.com/user-attachments/assets/7aa898ac-75bc-4708-a2bb-22e6e42b9a3d" />
 
 ---
 
