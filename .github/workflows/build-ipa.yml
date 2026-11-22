@@ -1,0 +1,16 @@
+name: Build IPA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: bash build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EY!6 Control-ipa
+          path: build/EY6Control.ipa
