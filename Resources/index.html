@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1230">
+<title>Egret EY! 6 Control</title>
+
+<style>
+:root {
+  --bg: #0a1230;
+  --bg2: #0f1c4d;
+  --card: rgba(255, 255, 255, 0.05);
+  --line: rgba(255, 255, 255, 0.22);
+  --txt: #eaf0ff;
+  --mut: #8f9cc4;
+  --acc: #4cc9f0;
+  --acc2: #5b7cff;
+  --ok: #2ecf8a;
+  --bad: #ff5d73;
+  --warn: #ffb648;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { background: #0a1230; }
+html, body { margin: 0; }
+td.mono { white-space: nowrap; }
+
+body {
+  min-height: 100vh;
+  color: var(--txt);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background:
+    radial-gradient(900px 500px at 50% -10%, #1b2f7a 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg2), var(--bg) 60%);
+  background-attachment: fixed;
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));
+}
+
+.wrap { max-width: 520px; margin: 0 auto; }
+
+/* ---------- Kopfzeile ---------- */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+header h1 { margin: 0; font-size: 20px; letter-spacing: .3px; }
+header small { color: var(--mut); display: block; font-size: 12px; margin-top: 2px; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--txt);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bad); }
+.pill.on .dot { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.pill.busy .dot { background: var(--warn); }
+
+/* ---------- Karten ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 18px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+
+.muted { color: var(--mut); font-size: 13px; line-height: 1.5; }
+
+button { font: inherit; color: inherit; }
+
+.btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn:disabled { opacity: .35; cursor: default; }
+.btn.lock { background: linear-gradient(135deg, #c0334a, #8e1f38); border-color: rgba(255,255,255,.35); }
+.btn.unlock { background: linear-gradient(135deg, #1fa771, #137a52); border-color: rgba(255,255,255,.35); }
+.btn.small { width: auto; padding: 11px 16px; font-size: 14px; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > .btn { flex: 1; min-width: 120px; }
+
+/* ---------- Tacho ---------- */
+.gauge-card { padding-bottom: 16px; }
+.gauge { width: 100%; display: block; }
+.g-track { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 12; stroke-linecap: round; }
+.g-val {
+  fill: none;
+  stroke: url(#gGrad);
+  stroke-width: 12;
+  stroke-linecap: round;
+  transition: stroke-dasharray .35s ease-out;
+  filter: drop-shadow(0 0 6px rgba(76, 201, 240, .55));
+}
+.g-tick { stroke: rgba(255,255,255,.35); stroke-width: 1.5; }
+.g-tick.major { stroke: rgba(255,255,255,.75); stroke-width: 2.2; }
+.g-lbl { fill: var(--mut); font-size: 11px; text-anchor: middle; dominant-baseline: middle; }
+.g-speed { fill: #fff; font-size: 74px; font-weight: 700; text-anchor: middle; }
+.g-unit { fill: var(--acc); font-size: 15px; font-weight: 700; letter-spacing: 3px; text-anchor: middle; }
+.g-extra { fill: var(--mut); font-size: 13px; text-anchor: middle; }
+
+.gauge-card .btn { margin-top: 6px; }
+
+/* ---------- Kacheln ---------- */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255,255,255,.03);
+}
+.tile.wide { grid-column: 1 / -1; }
+.tile small { display: block; color: var(--mut); font-size: 12px; margin-bottom: 6px; }
+.tile b { font-size: 22px; line-height: 1.15; display: block; }
+.tile[hidden] { display: none; }
+
+.bar { height: 10px; border-radius: 6px; background: rgba(255,255,255,.1); margin-top: 10px; overflow: hidden; }
+.bar > div { height: 100%; width: 0; border-radius: 6px; background: var(--ok); transition: width .4s, background .4s; }
+
+/* ---------- Segment-Schalter ---------- */
+.seg { display: flex; gap: 8px; }
+.seg button {
+  flex: 1;
+  padding: 14px 6px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+.seg button small { display: block; font-weight: 500; font-size: 11px; color: var(--mut); margin-top: 3px; }
+.seg button.active {
+  background: linear-gradient(135deg, var(--acc2), #3a56d4);
+  border-color: rgba(255,255,255,.55);
+}
+.seg button.active small { color: #dbe4ff; }
+.seg button:disabled { opacity: .35; cursor: default; }
+
+/* ---------- Tabellen / Diagnose ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
+th { color: var(--mut); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+td.mono, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+tr.chg td { background: rgba(255, 182, 72, .18); }
+.scroll-x { overflow-x: auto; }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 14px; }
+.kv span:nth-child(odd) { color: var(--mut); }
+.kv span:nth-child(even) { text-align: right; font-weight: 600; }
+
+/* ---------- Log ---------- */
+#log {
+  background: rgba(0, 0, 0, .28);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 12px;
+  height: 52vh;
+  min-height: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #c9d6f5;
+}
+
+label.chk { display: flex; gap: 10px; align-items: center; font-size: 14px; margin: 12px 0 0; color: var(--txt); }
+label.chk input { width: 18px; height: 18px; accent-color: var(--acc2); }
+
+/* ---------- Tabs ---------- */
+.tab { display: none; }
+.tab.active { display: block; animation: fade .25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+nav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  width: min(calc(100% - 28px), 492px);
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(14, 24, 64, .82);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+  z-index: 10;
+}
+
+nav button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 2px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mut);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+
+nav button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+nav button.active { background: rgba(91, 124, 255, .28); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  top: calc(18px + env(safe-area-inset-top));
+  transform: translate(-50%, -80px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(14, 24, 64, .95);
+  border: 1px solid var(--line);
+  font-size: 14px;
+  transition: transform .3s;
+  z-index: 20;
+}
+#toast.show { transform: translate(-50%, 0); }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Egret EY! 6</h1>
+    <small id="devName">Kein Roller verbunden</small>
+  </div>
+  <button class="pill" id="connect"><span class="dot"></span><span id="connText">Verbinden</span></button>
+</header>
+
+<!-- ===================== ÜBERSICHT ===================== -->
+<section class="tab active" id="tab-overview">
+
+  <div class="card gauge-card">
+    <svg class="gauge" viewBox="0 0 300 250" role="img" aria-label="Tacho">
+      <defs>
+        <linearGradient id="gGrad" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="#5b7cff"/>
+          <stop offset="1" stop-color="#4cf0d0"/>
+        </linearGradient>
+      </defs>
+      <path class="g-track" id="gTrack" pathLength="100"
+            d="M 72.22 217.78 A 110 110 0 1 1 227.78 217.78"/>
+      <path class="g-val" id="gVal" pathLength="100" stroke-dasharray="0 100"
+            d="M 72.22 217.78 A 110 110 0 1 1 227.78 217.78"/>
+      <g id="gTicks"></g>
+      <text class="g-speed" id="gSpeed" x="150" y="155">–</text>
+      <text class="g-unit" id="gUnit" x="150" y="182">KM/H</text>
+      <text class="g-extra" id="gExtra" x="150" y="238"></text>
+    </svg>
+
+    <button class="btn lock" id="lockBtn" disabled>🔒 Air Lock sperren</button>
+  </div>
+
+  <div class="card">
+    <h2>Live-Daten</h2>
+    <div class="grid">
+      <div class="tile wide">
+        <small>Akku</small>
+        <b id="vBatt">–</b>
+        <div class="bar"><div id="battBar"></div></div>
+      </div>
+      <div class="tile"><small>Fahrmodus</small><b id="vMode">–</b></div>
+      <div class="tile"><small>Geschwindigkeit</small><b id="vSpeed">–</b></div>
+      <div class="tile"><small>Licht</small><b id="vLight">–</b></div>
+      <div class="tile"><small>Air Lock</small><b id="vLock">–</b></div>
+      <div class="tile" id="tVolt" hidden><small>Spannung</small><b id="vVolt">–</b></div>
+      <div class="tile" id="tWatt" hidden><small>Leistung</small><b id="vWatt">–</b></div>
+    </div>
+    <p class="muted" id="liveInfo" style="margin:12px 0 0">Warte auf Verbindung</p>
+  </div>
+</section>
+
+<!-- ===================== EINSTELLUNG ===================== -->
+<section class="tab" id="tab-settings">
+
+  <div class="card">
+    <h2>Fahrmodus</h2>
+    <div class="seg" id="modeSeg">
+      <button data-gear="1" disabled>Eco<small>Stufe 1</small></button>
+      <button data-gear="2" disabled>Drive<small>Stufe 2</small></button>
+      <button data-gear="3" disabled>Sport<small>Stufe 3</small></button>
+    </div>
+    <p class="muted" style="margin:12px 0 0">
+      Der EY! 6 kennt drei Fahrstufen. Die Zuordnung Eco / Drive / Sport
+      zu 1 / 2 / 3 ist eine Annahme, die Stufe selbst meldet der Roller.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Einheit</h2>
+    <div class="seg" id="unitSeg">
+      <button data-unit="kmh" disabled>km/h</button>
+      <button data-unit="mph" disabled>mph</button>
+    </div>
+    <p class="muted" style="margin:12px 0 0">
+      Sendet die Einheit an den Roller. Der Tacho rechnet die gemeldete
+      Geschwindigkeit selbst um (Annahme: der Roller meldet immer km/h).
+      Prüfe das in der Diagnose am Rohwert.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Air Lock</h2>
+    <div class="row">
+      <button class="btn lock" id="setLock" disabled>🔒 Sperren</button>
+      <button class="btn unlock" id="setUnlock" disabled>🔓 Entsperren</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Autoverbinden</h2>
+    <label class="chk" style="margin-top:0"><input type="checkbox" id="autoChk"> Roller beim Öffnen der App automatisch verbinden</label>
+    <p class="muted" id="autoInfo" style="margin:12px 0 0"></p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn small" id="autoForget" disabled>Gemerkten Roller vergessen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DIAGNOSE ===================== -->
+<section class="tab" id="tab-diag">
+
+  <div class="card">
+    <h2>Funkverbindung</h2>
+    <div class="kv" id="dRadio"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn small" id="dQuery" disabled>Status jetzt abfragen</button>
+      <button class="btn small" id="dInfo" disabled>Gerätedaten lesen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Statusframe Byte für Byte</h2>
+    <div class="scroll-x"><table id="dBytes"></table></div>
+    <p class="muted" style="margin:10px 0 0">
+      Gelb = Byte hat sich in den letzten 3 Sekunden geändert. Jede
+      Bit-Änderung steht zusätzlich im Log. Damit lässt sich zum Beispiel
+      herausfinden, welches Bit der Tempomat am Roller setzt.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Alle empfangenen Funktionen</h2>
+    <div class="scroll-x"><table id="dFuncs"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Gerätedaten (Bluetooth)</h2>
+    <div class="kv" id="dDevice"><span>Noch nicht gelesen</span><span></span></div>
+  </div>
+
+  <div class="card">
+    <h2>Nicht verfügbar</h2>
+    <p class="muted" style="margin:0">
+      Spannung, Strom, Leistung und Temperatur sendet der EY! 6 in diesem
+      Frame nicht. Sobald ein Wert auftaucht, erscheint er hier und im Tacho.
+      Befehle blind durchzuprobieren habe ich bewusst nicht eingebaut,
+      weil falsche Frames die Steuerung beschädigen können.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== LOGS ===================== -->
+<section class="tab" id="tab-logs">
+  <div class="card">
+    <h2>Protokoll</h2>
+    <div id="log"></div>
+    <label class="chk"><input type="checkbox" id="logLive"> Live-Frames mitschreiben (viele Zeilen)</label>
+    <div class="row" style="margin-top:14px">
+      <button class="btn small" id="logCopy">Kopieren</button>
+      <button class="btn small" id="logSave">Speichern</button>
+      <button class="btn small" id="logClear">Leeren</button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div id="toast"></div>
+
+<nav>
+  <button class="active" data-tab="overview">
+    <svg viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/></svg>Übersicht
+  </button>
+  <button data-tab="settings">
+    <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Einstellung
+  </button>
+  <button data-tab="diag">
+    <svg viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>Diagnose
+  </button>
+  <button data-tab="logs">
+    <svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg>Logs
+  </button>
+</nav>
+
+<script>
+(() => {
+
+const SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+const WRITE   = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const NOTIFY  = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+
+const $ = id => document.getElementById(id);
+
+const S = {
+  device: null, tx: null, rx: null, buf: [],
+  connected: false,
+  unit: "kmh",
+  t: { batt: null, kmh: null, gear: null, locked: null, light: null, volt: null, watt: null },
+  last: null,
+  min: [], max: [], changedAt: [],
+  frames: 0, junk: 0, times: [], lastAt: 0,
+  funcs: {},
+  info: []
+};
+
+try { if (localStorage.getItem("ey6unit") === "mph") S.unit = "mph"; } catch (e) {}
+
+/* Autoverbinden: Schalter + ID des gemerkten Rollers */
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+S.auto = store.get("ey6auto") === "1";
+let searchAbort = null;   // läuft gerade die Suche nach dem Roller?
+
+/* ---------------- Hilfsfunktionen ---------------- */
+
+const hb = v => v.toString(16).padStart(2, "0").toUpperCase();
+const hex = a => Array.from(a).map(hb).join(" ");
+const bin = v => v.toString(2).padStart(8, "0");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+let toastTimer = null;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+}
+
+/* ---------------- Log ---------------- */
+
+const logLines = [];
+let activeTab = "overview";
+
+function log(msg) {
+  logLines.push("[" + new Date().toLocaleTimeString("de-DE") + "] " + msg);
+  if (logLines.length > 1500) logLines.shift();
+  if (activeTab === "logs") renderLog();
+}
+
+function renderLog() {
+  const el = $("log");
+  const atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 40;
+  el.textContent = logLines.join("\n");
+  if (atEnd) el.scrollTop = el.scrollHeight;
+}
+
+async function copyLog() {
+  const text = logLines.join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e2) {}
+    ta.remove();
+  }
+  toast("Log kopiert");
+}
+
+function saveLog() {
+  const blob = new Blob([logLines.join("\n")], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ey6-log.txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------------- EY-Protokoll ---------------- */
+
+function eyCrc16(bytes) {
+  let crc = 0;
+  for (const bb of bytes) {
+    let x = (((crc << 8) | (crc >>> 8)) ^ (bb & 255)) & 65535;
+    x = (x ^ ((x & 255) >>> 4)) & 65535;
+    x = (x ^ ((x << 12) & 65535)) & 65535;
+    x = (x ^ ((x & 255) << 5)) & 65535;
+    crc = x & 65535;
+  }
+  return crc;
+}
+
+function makeFrame(address, func, data) {
+  const head = [0x5A, address, func, func, data.length, ...data];
+  const crc = eyCrc16(head);
+  return [...head, (crc >> 8) & 255, crc & 255].map((v, i) => (v ^ (i + 10)) & 255);
+}
+
+/* Alle Schreibzugriffe laufen nacheinander, sonst meldet Bluetooth
+   "GATT operation already in progress". */
+let chain = Promise.resolve();
+function enqueue(fn) {
+  const p = chain.then(fn);
+  chain = p.catch(() => {});
+  return p;
+}
+
+function send(func, data, label, quiet) {
+  return enqueue(async () => {
+    if (!S.tx) throw new Error("Keine Verbindung");
+    const frame = makeFrame(0x23, func, data);
+    if (!quiet) log("TX " + label + ": " + hex(frame) + "   (Klartext F" + hb(func) + " " + hex(data) + ")");
+    const bytes = Uint8Array.from(frame);
+    if (S.tx.properties.write) await S.tx.writeValueWithResponse(bytes);
+    else if (S.tx.properties.writeWithoutResponse) await S.tx.writeValueWithoutResponse(bytes);
+    else throw new Error("Schreiben nicht unterstützt");
+  });
+}
+
+let pollT = null, pollBusy = false, pollFail = false;
+
+function poll() {
+  if (pollBusy || !S.tx) return;
+  pollBusy = true;
+  send(0x02, [0x40, 0x40], "ABFRAGE", true)
+    .then(() => { pollFail = false; })
+    .catch(e => { if (!pollFail) log("FEHLER Abfrage: " + e.message); pollFail = true; })
+    .finally(() => { pollBusy = false; });
+}
+
+function startPolling() {
+  stopPolling();
+  poll();
+  pollT = setInterval(poll, 600);
+}
+
+function stopPolling() {
+  if (pollT) clearInterval(pollT);
+  pollT = null;
+}
+
+/* ---------------- Empfang ---------------- */
+
+function onNotify(ev) {
+  const v = ev.target.value;
+  for (let i = 0; i < v.byteLength; i++) S.buf.push(v.getUint8(i));
+
+  // Rahmen nur annehmen, wenn Kopf plausibel und die Prüfsumme stimmt.
+  // Sonst ein Byte verwerfen und neu synchronisieren (der Roller schickt
+  // gelegentlich abgeschnittene oder verschobene Pakete).
+  while (S.buf.length >= 7) {
+    const b = S.buf;
+    if (b[0] !== 0x5A || b[2] !== b[3] || b[4] > 40) { b.shift(); S.junk++; continue; }
+    const total = b[4] + 7;
+    if (b.length < total) break;
+    const crcRx = (b[total - 2] << 8) | b[total - 1];
+    if (eyCrc16(b.slice(0, total - 2)) !== crcRx) { b.shift(); S.junk++; continue; }
+    onFrame(b.splice(0, total));
+  }
+  if (S.buf.length > 200) S.buf = S.buf.slice(-60);
+}
+
+function onFrame(frame) {
+  const len = frame[4];
+  const func = frame[2];
+  const data = frame.slice(5, 5 + len);
+  const crcOk = true;   // schon beim Zusammensetzen geprüft
+  const now = Date.now();
+
+  S.frames++;
+  S.lastAt = now;
+  S.times.push(now);
+  while (S.times.length && now - S.times[0] > 5000) S.times.shift();
+
+  const f = S.funcs[func] || (S.funcs[func] = { count: 0 });
+  f.count++;
+  f.raw = frame;
+  f.data = data;
+  f.at = now;
+  f.crcOk = crcOk;
+
+  const first = f.count === 1;
+  if (func !== 0x01 || $("logLive").checked || first) {
+    log("RX F" + hb(func) + (crcOk ? "" : " (CRC abweichend)") + ": " + hex(frame));
+  }
+
+  if (func === 0x01 && data.length >= 6) onStatus(data);
+}
+
+function onStatus(d) {
+  const now = Date.now();
+
+  // Byteweise Änderungen erkennen (Geschwindigkeit in Byte 1/2 ausgenommen)
+  if (S.last) {
+    d.forEach((b, i) => {
+      if (S.last[i] !== b && i !== 1 && i !== 2) {
+        S.changedAt[i] = now;
+        log("ÄNDERUNG Byte " + i + ": " + bin(S.last[i]) + " -> " + bin(b) + "  (" + hb(S.last[i]) + " -> " + hb(b) + ")");
+      } else if (S.last[i] !== b) {
+        S.changedAt[i] = now;
+      }
+    });
+  }
+  d.forEach((b, i) => {
+    S.min[i] = S.min[i] === undefined ? b : Math.min(S.min[i], b);
+    S.max[i] = S.max[i] === undefined ? b : Math.max(S.max[i], b);
+  });
+  S.last = d.slice();
+
+  // Dekodierung laut eg-unlock (EyBasicData)
+  S.t.batt = Math.min(100, d[0]);
+  S.t.kmh = ((d[1] << 7) | d[2]) / 10;
+  S.t.gear = d[3] & 7;
+  S.t.locked = !!(d[5] & 0x20);
+  S.t.light = !!(d[5] & 0x08);
+
+  renderOverview();
+  renderSettings();
+}
+
+/* ---------------- Tacho ---------------- */
+
+const SCALE = {
+  kmh: { max: 40, major: 10, minor: 5, label: "KM/H" },
+  mph: { max: 25, major: 5, minor: 1, label: "MPH" }
+};
+const CX = 150, CY = 140;
+
+function pt(r, deg) {
+  const a = deg * Math.PI / 180;
+  return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+}
+
+function buildTicks() {
+  const sc = SCALE[S.unit];
+  let out = "";
+  for (let v = 0; v <= sc.max; v += sc.minor) {
+    const major = v % sc.major === 0;
+    const deg = 135 + (v / sc.max) * 270;
+    const [x1, y1] = pt(major ? 90 : 95, deg);
+    const [x2, y2] = pt(101, deg);
+    out += '<line class="g-tick' + (major ? " major" : "") + '" x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"/>';
+    if (major) {
+      const [lx, ly] = pt(75, deg);
+      out += '<text class="g-lbl" x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '">' + v + "</text>";
+    }
+  }
+  $("gTicks").innerHTML = out;
+  $("gUnit").textContent = sc.label;
+}
+
+function dispSpeed(kmh) {
+  return S.unit === "mph" ? kmh * 0.621371 : kmh;
+}
+
+function modeName(g) {
+  return g === 1 ? "Eco" : g === 2 ? "Drive" : g === 3 ? "Sport" : g === 0 ? "Stufe 0" : "Stufe " + g;
+}
+
+function renderOverview() {
+  const t = S.t, sc = SCALE[S.unit];
+  const have = S.connected && t.batt !== null;
+
+  const sp = have ? dispSpeed(t.kmh) : null;
+  $("gSpeed").textContent = sp === null ? "–" : Math.round(sp);
+  const pct = sp === null ? 0 : Math.max(0, Math.min(1, sp / sc.max));
+  $("gVal").setAttribute("stroke-dasharray", (pct * 100).toFixed(2) + " 100");
+  $("gVal").style.opacity = pct < 0.004 ? 0 : 1;
+
+  const extra = [];
+  if (t.volt !== null) extra.push(t.volt.toFixed(1) + " V");
+  if (t.watt !== null) extra.push(Math.round(t.watt) + " W");
+  $("gExtra").textContent = extra.join("  ·  ");
+
+  $("vBatt").textContent = have ? t.batt + " %" : "–";
+  $("battBar").style.width = have ? t.batt + "%" : "0";
+  $("battBar").style.background = !have ? "" : t.batt <= 15 ? "var(--bad)" : t.batt <= 30 ? "var(--warn)" : "var(--ok)";
+
+  $("vMode").textContent = have ? modeName(t.gear) : "–";
+  $("vSpeed").textContent = have ? Math.round(sp) + " • " + sc.label : "–";
+  $("vLight").textContent = have ? (t.light ? "An" : "Aus") : "–";
+  $("vLock").textContent = have ? (t.locked ? "Gesperrt" : "Offen") : "–";
+
+  $("tVolt").hidden = t.volt === null;
+  $("tWatt").hidden = t.watt === null;
+  if (t.volt !== null) $("vVolt").textContent = t.volt.toFixed(1) + " V";
+  if (t.watt !== null) $("vWatt").textContent = Math.round(t.watt) + " W";
+
+  const lb = $("lockBtn");
+  lb.disabled = !S.connected;
+  if (t.locked) {
+    lb.textContent = "🔓 Air Lock entsperren";
+    lb.className = "btn unlock";
+  } else {
+    lb.textContent = "🔒 Air Lock sperren";
+    lb.className = "btn lock";
+  }
+
+  $("liveInfo").textContent = have
+    ? "Aktualisiert " + new Date().toLocaleTimeString("de-DE")
+    : S.connected ? "Warte auf Daten vom Roller ..." : "Warte auf Verbindung";
+}
+
+/* ---------------- Einstellungen ---------------- */
+
+function renderSettings() {
+  document.querySelectorAll("#modeSeg button").forEach(b => {
+    b.disabled = !S.connected;
+    b.classList.toggle("active", S.t.gear === Number(b.dataset.gear));
+  });
+  document.querySelectorAll("#unitSeg button").forEach(b => {
+    b.disabled = !S.connected;
+    b.classList.toggle("active", S.unit === b.dataset.unit);
+  });
+  $("setLock").disabled = !S.connected;
+  $("setUnlock").disabled = !S.connected;
+  $("dQuery").disabled = !S.connected;
+  $("dInfo").disabled = !S.connected;
+}
+
+async function run(fn) {
+  try { await fn(); } catch (e) { log("FEHLER: " + e.message); toast("Fehler: " + e.message); }
+}
+
+async function setGear(g) {
+  await send(0x05, [(0xA0 | g) & 255, 0x00], "FAHRSTUFE " + g);
+  toast(modeName(g) + " gesendet");
+  setTimeout(poll, 250);
+}
+
+async function setUnit(u) {
+  await send(0x02, u === "mph" ? [0x80, 0x80] : [0x00, 0x80], u === "mph" ? "EINHEIT MPH" : "EINHEIT KM/H");
+  S.unit = u;
+  try { localStorage.setItem("ey6unit", u); } catch (e) {}
+  buildTicks();
+  renderOverview();
+  renderSettings();
+  toast(u === "mph" ? "mph gesendet" : "km/h gesendet");
+}
+
+async function setLock(on) {
+  if (on && S.t.kmh > 2 && !confirm("Der Roller fährt noch (" + Math.round(dispSpeed(S.t.kmh)) + " " + SCALE[S.unit].label + "). Trotzdem sperren?")) return;
+  await send(0x02, on ? [0x01, 0x01] : [0x00, 0x01], on ? "SPERREN" : "ENTSPERREN");
+  toast(on ? "Sperren gesendet" : "Entsperren gesendet");
+  setTimeout(poll, 250);
+}
+
+/* ---------------- Diagnose ---------------- */
+
+const BYTE_INFO = {
+  0: "Akku in %",
+  1: "Geschwindigkeit (oberer Teil, 7 Bit)",
+  2: "Geschwindigkeit (unterer Teil)",
+  3: "Fahrstufe (Bits 0-2)",
+  4: "unbekannt",
+  5: "Flags: Bit 5 = Sperre, Bit 3 = Licht"
+};
+
+function renderDiag() {
+  const now = Date.now();
+  const rate = S.times.length > 1 ? (S.times.length - 1) / ((S.times[S.times.length - 1] - S.times[0]) / 1000) : 0;
+
+  const radio = [
+    ["Status", S.connected ? "Verbunden" : "Getrennt"],
+    ["Gerät", S.device ? (S.device.name || "Unbekannt") : "–"],
+    ["Frames empfangen", S.frames],
+    ["Frames pro Sekunde", rate ? rate.toFixed(1) : "–"],
+    ["Verworfene Bytes (kaputte Pakete)", S.junk],
+    ["Letzter Frame", S.lastAt ? Math.round((now - S.lastAt) / 100) / 10 + " s her" : "–"],
+    ["Roh-Geschwindigkeit", S.last ? ((S.last[1] << 7) | S.last[2]) + " (÷10 = " + (((S.last[1] << 7) | S.last[2]) / 10).toFixed(1) + ")" : "–"]
+  ];
+  $("dRadio").innerHTML = radio.map(r => "<span>" + esc(r[0]) + "</span><span>" + esc(r[1]) + "</span>").join("");
+
+  // Status-Bytes
+  let rows = "<tr><th>#</th><th>Hex</th><th>Dez</th><th>Binär</th><th>Min–Max</th><th>Bedeutung</th></tr>";
+  if (S.last) {
+    S.last.forEach((b, i) => {
+      const chg = S.changedAt[i] && now - S.changedAt[i] < 3000;
+      rows += '<tr class="' + (chg ? "chg" : "") + '"><td>' + i + '</td><td class="mono">' + hb(b) +
+        '</td><td class="mono">' + b + '</td><td class="mono">' + bin(b) + '</td><td class="mono">' +
+        S.min[i] + "–" + S.max[i] + "</td><td>" + esc(BYTE_INFO[i] || "unbekannt") + "</td></tr>";
+    });
+  } else {
+    rows += '<tr><td colspan="6" class="muted">Noch kein Statusframe empfangen</td></tr>';
+  }
+  $("dBytes").innerHTML = rows;
+
+  // Funktionen
+  let frows = "<tr><th>Funktion</th><th>Anzahl</th><th>Daten</th><th>CRC</th></tr>";
+  const keys = Object.keys(S.funcs);
+  if (keys.length) {
+    keys.forEach(k => {
+      const f = S.funcs[k];
+      frows += '<tr><td class="mono">' + hb(Number(k)) + '</td><td>' + f.count + '</td><td class="mono">' + hex(f.data) +
+        "</td><td>" + (f.crcOk ? "ok" : "abweichend") + "</td></tr>";
+    });
+  } else {
+    frows += '<tr><td colspan="4" class="muted">Noch nichts empfangen</td></tr>';
+  }
+  $("dFuncs").innerHTML = frows;
+
+  $("dDevice").innerHTML = S.info.length
+    ? S.info.map(r => "<span>" + esc(r[0]) + "</span><span>" + esc(r[1]) + "</span>").join("")
+    : "<span>Noch nicht gelesen</span><span></span>";
+}
+
+/* Nur lesende Standard-Bluetooth-Daten (Geräteinfo, Akkudienst). */
+let infoBusy = false;
+async function readDeviceInfo() {
+  if (infoBusy) return;
+  if (!S.device || !S.device.gatt.connected) throw new Error("Nicht verbunden");
+  infoBusy = true;
+  try { await readDeviceInfoInner(); } finally { infoBusy = false; }
+}
+
+async function readDeviceInfoInner() {
+  S.info = [];
+  const server = S.device.gatt;
+  const dec = new TextDecoder();
+
+  const tryService = async (name, chars) => {
+    let svc;
+    try { svc = await enqueue(() => server.getPrimaryService(name)); }
+    catch (e) { S.info.push([name, "nicht freigegeben"]); return; }
+    for (const [cname, label, asText] of chars) {
+      try {
+        const c = await enqueue(() => svc.getCharacteristic(cname));
+        const v = await enqueue(() => c.readValue());
+        const val = asText ? dec.decode(v) : v.getUint8(0) + " %";
+        S.info.push([label, val]);
+        log("GERÄT " + label + ": " + val);
+      } catch (e) { /* Merkmal nicht vorhanden */ }
+    }
+  };
+
+  await tryService("device_information", [
+    ["manufacturer_name_string", "Hersteller", true],
+    ["model_number_string", "Modell", true],
+    ["serial_number_string", "Seriennummer", true],
+    ["hardware_revision_string", "Hardware", true],
+    ["firmware_revision_string", "Firmware", true],
+    ["software_revision_string", "Software", true]
+  ]);
+  if (!S.info.length) S.info.push(["Ergebnis", "nichts lesbar"]);
+  renderDiag();
+}
+
+/* ---------------- Verbindung ---------------- */
+
+function setConn(state) {
+  const pill = $("connect");
+  pill.classList.toggle("on", state === "on");
+  pill.classList.toggle("busy", state === "busy" || state === "search");
+  $("connText").textContent = state === "on" ? "Trennen" : state === "busy" ? "Verbinde ..." : state === "search" ? "Suche ... (Abbrechen)" : "Verbinden";
+}
+
+function onDisconnected() {
+  S.connected = false;
+  S.tx = null; S.rx = null; S.buf = [];
+  stopPolling();
+  S.t = { batt: null, kmh: null, gear: null, locked: null, light: null, volt: null, watt: null };
+  setConn("off");
+  $("devName").textContent = "Verbindung getrennt";
+  log("Bluetooth-Verbindung getrennt.");
+  renderOverview();
+  renderSettings();
+}
+
+function stopSearch() {
+  if (searchAbort) { searchAbort.abort(); searchAbort = null; }
+}
+
+async function connect() {
+  if (searchAbort) {
+    stopSearch();
+    setConn("off");
+    $("devName").textContent = "Suche abgebrochen";
+    log("Autoverbinden: Suche abgebrochen.");
+    return;
+  }
+  if (S.device && S.device.gatt.connected) {
+    S.device.gatt.disconnect();
+    return;
+  }
+  try {
+    setConn("busy");
+    const dev = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: [SERVICE, "device_information", "battery_service"]
+    });
+    await openDevice(dev);
+  } catch (e) {
+    connectFailed(e);
+  }
+}
+
+function connectFailed(e) {
+  setConn("off");
+  S.connected = false;
+  log("FEHLER Verbindung: " + e.message);
+  toast("Verbindung fehlgeschlagen");
+  renderOverview();
+  renderSettings();
+}
+
+/* ---------------- Autoverbinden ---------------- */
+
+function renderAuto() {
+  $("autoChk").checked = S.auto;
+  $("autoForget").disabled = !store.get("ey6dev");
+  const can = !!(navigator.bluetooth && navigator.bluetooth.getDevices);
+  $("autoInfo").textContent =
+    !can ? "Dieser Browser unterstützt kein Merken von Geräten (Chrome nötig, ggf. chrome://flags → \"Web Bluetooth new permissions backend\")."
+    : !S.auto ? "Aus. Du musst den Roller bei jedem Start selbst über „Verbinden“ auswählen."
+    : store.get("ey6dev") ? "An. Der Roller ist gemerkt und wird beim Öffnen der App automatisch verbunden."
+    : "An. Verbinde den Roller einmal manuell, dann wird er gemerkt.";
+}
+
+function rememberDevice(dev) {
+  if (S.auto && dev && dev.id) {
+    store.set("ey6dev", dev.id);
+    log("Autoverbinden: Roller gemerkt (" + (dev.name || "?") + ").");
+  }
+  renderAuto();
+}
+
+async function forgetDevice() {
+  store.del("ey6dev");
+  try {
+    if (navigator.bluetooth && navigator.bluetooth.getDevices) {
+      const devs = await navigator.bluetooth.getDevices();
+      for (const d of devs) if (typeof d.forget === "function") await d.forget();
+    }
+  } catch (e) { log("Hinweis beim Vergessen: " + e.message); }
+  renderAuto();
+}
+
+async function setAuto(on) {
+  S.auto = on;
+  store.set("ey6auto", on ? "1" : "0");
+  if (on) {
+    if (S.connected && S.device) rememberDevice(S.device);
+    toast("Autoverbinden an");
+  } else {
+    stopSearch();
+    await forgetDevice();
+    toast("Autoverbinden aus");
+  }
+  renderAuto();
+}
+
+async function autoConnect() {
+  if (!S.auto) return;
+  const id = store.get("ey6dev");
+  if (!id) { log("Autoverbinden: noch kein Roller gemerkt."); return; }
+  if (!navigator.bluetooth || !navigator.bluetooth.getDevices) {
+    log("Autoverbinden: Browser unterstützt getDevices() nicht.");
+    return;
+  }
+  let dev;
+  try {
+    const devs = await navigator.bluetooth.getDevices();
+    dev = devs.find(d => d.id === id);
+  } catch (e) { log("Autoverbinden: " + e.message); return; }
+  if (!dev) { log("Autoverbinden: gemerkter Roller nicht mehr freigegeben. Bitte einmal manuell verbinden."); return; }
+
+  log("Autoverbinden: versuche " + (dev.name || "Roller") + " ...");
+  $("devName").textContent = dev.name || "Roller";
+
+  // Bevorzugt auf Werbepakete warten: so verbindet die App, sobald der Roller in Reichweite ist.
+  if (typeof dev.watchAdvertisements === "function") {
+    try {
+      const ac = new AbortController();
+      searchAbort = ac;
+      setConn("search");
+      $("devName").textContent = "Suche " + (dev.name || "Roller") + " ...";
+      await new Promise((resolve, reject) => {
+        const onAdv = () => { dev.removeEventListener("advertisementreceived", onAdv); resolve(); };
+        dev.addEventListener("advertisementreceived", onAdv);
+        ac.signal.addEventListener("abort", () => { dev.removeEventListener("advertisementreceived", onAdv); reject(new Error("abgebrochen")); });
+        dev.watchAdvertisements({ signal: ac.signal }).catch(reject);
+      });
+      searchAbort = null;
+    } catch (e) {
+      searchAbort = null;
+      if (e.message === "abgebrochen") return;
+      log("Autoverbinden: Werbepakete nicht nutzbar (" + e.message + "), verbinde direkt.");
+    }
+  }
+  try {
+    setConn("busy");
+    await openDevice(dev);
+  } catch (e) {
+    connectFailed(e);
+  }
+}
+
+async function openDevice(dev) {
+  {
+    S.device = dev;
+    $("devName").textContent = S.device.name || "Unbekanntes Gerät";
+    S.device.removeEventListener("gattserverdisconnected", onDisconnected);
+    S.device.addEventListener("gattserverdisconnected", onDisconnected);
+
+    const server = await S.device.gatt.connect();
+    const svc = await server.getPrimaryService(SERVICE);
+    S.tx = await svc.getCharacteristic(WRITE);
+    S.rx = await svc.getCharacteristic(NOTIFY);
+    await S.rx.startNotifications();
+    S.rx.addEventListener("characteristicvaluechanged", onNotify);
+
+    S.connected = true;
+    S.frames = 0; S.junk = 0; S.buf = []; S.times = []; S.funcs = {}; S.last = null;
+    S.min = []; S.max = []; S.changedAt = []; S.info = [];
+    setConn("on");
+    log("Verbunden mit " + (S.device.name || "?") + ". Keine automatische Sperr- oder Entsperraktion.");
+    renderOverview();
+    renderSettings();
+    startPolling();
+    rememberDevice(S.device);
+  }
+}
+
+/* ---------------- Tabs & Events ---------------- */
+
+function showTab(name) {
+  activeTab = name;
+  document.querySelectorAll(".tab").forEach(s => s.classList.toggle("active", s.id === "tab-" + name));
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  if (name === "logs") { renderLog(); $("log").scrollTop = $("log").scrollHeight; }
+  if (name === "diag") renderDiag();
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+$("connect").addEventListener("click", connect);
+$("lockBtn").addEventListener("click", () => run(() => setLock(!S.t.locked)));
+$("setLock").addEventListener("click", () => run(() => setLock(true)));
+$("setUnlock").addEventListener("click", () => run(() => setLock(false)));
+document.querySelectorAll("#modeSeg button").forEach(b => b.addEventListener("click", () => run(() => setGear(Number(b.dataset.gear)))));
+document.querySelectorAll("#unitSeg button").forEach(b => b.addEventListener("click", () => run(() => setUnit(b.dataset.unit))));
+$("dQuery").addEventListener("click", () => run(async () => { await send(0x02, [0x40, 0x40], "ABFRAGE"); }));
+$("dInfo").addEventListener("click", () => run(readDeviceInfo));
+$("autoChk").addEventListener("change", e => run(() => setAuto(e.target.checked)));
+$("autoForget").addEventListener("click", () => run(async () => { await forgetDevice(); toast("Roller vergessen"); }));
+$("logCopy").addEventListener("click", copyLog);
+$("logSave").addEventListener("click", saveLog);
+$("logClear").addEventListener("click", () => { logLines.length = 0; log("Protokoll geleert."); renderLog(); });
+
+setInterval(() => { if (activeTab === "diag") renderDiag(); }, 500);
+
+buildTicks();
+renderOverview();
+renderSettings();
+log("Programm gestartet.");
+renderAuto();
+autoConnect();
+
+})();
+</script>
+</body>
+</html>
