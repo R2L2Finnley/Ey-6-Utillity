@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>de</string>
-  <key>CFBundleExecutable</key><string>EY6Control</string>
-  <key>CFBundleIdentifier</key><string>de.finnley.ey6control</string>
+  <key>CFBundleExecutable</key><string>EY6Utility</string>
+  <key>CFBundleIdentifier</key><string>de.finnley.ey6utility</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-  <key>CFBundleName</key><string>EY6 Control</string>
-  <key>CFBundleDisplayName</key><string>EY6 Control</string>
+  <key>CFBundleName</key><string>EY!6 Utillity</string>
+  <key>CFBundleDisplayName</key><string>EY!6 Utillity</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>1.0</string>
   <key>CFBundleVersion</key><string>1</string>
@@ -31,8 +31,8 @@
     <string>UIInterfaceOrientationLandscapeRight</string>
   </array>
   <key>NSBluetoothAlwaysUsageDescription</key>
-  <string>EY6 Control verbindet sich per Bluetooth mit deinem Egret EY! 6.</string>
+  <string>EY!6 Utillity verbindet sich per Bluetooth mit deinem Egret EY! 6.</string>
   <key>NSBluetoothPeripheralUsageDescription</key>
-  <string>EY6 Control verbindet sich per Bluetooth mit deinem Egret EY! 6.</string>
+  <string>EY!6 Utillity verbindet sich per Bluetooth mit deinem Egret EY! 6.</string>
 </dict>
 </plist>
